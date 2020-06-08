@@ -1,0 +1,392 @@
+@font-face {
+  font-family: 'revsglobal-pr-mod';
+  src:  url('https://d1azc1qln24ryf.cloudfront.net/40686/revsglobal-pr-mod/revsglobal-pr-mod.eot?i1jihy');
+  src:  url('https://d1azc1qln24ryf.cloudfront.net/40686/revsglobal-pr-mod/revsglobal-pr-mod.eot?i1jihy#iefix') format('embedded-opentype'),
+    url('https://d1azc1qln24ryf.cloudfront.net/40686/revsglobal-pr-mod/revsglobal-pr-mod.woff2?i1jihy') format('woff2'),
+    url('https://d1azc1qln24ryf.cloudfront.net/40686/revsglobal-pr-mod/revsglobal-pr-mod.ttf?i1jihy') format('truetype'),
+    url('https://d1azc1qln24ryf.cloudfront.net/40686/revsglobal-pr-mod/revsglobal-pr-mod.woff?i1jihy') format('woff'),
+    url('https://d1azc1qln24ryf.cloudfront.net/40686/revsglobal-pr-mod/revsglobal-pr-mod.svg?i1jihy#revsglobal-pr-mod') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+.checked_star {
+	color:orange;
+}
+.reviewer_img {
+    height: 40px;
+    width: 40px;
+    border-radius: 20px;
+    display: block;
+    float: none;
+    margin-left: auto;
+    margin-right: auto;
+}
+.cst_indi_review_meta{
+	vertical-align: top;
+    width: 150px;
+    display: inline-block;
+    margin-bottom: 5px;
+    padding: 0 1%;
+}
+.cst_indi_review_text_cvr{
+	vertical-align: top;
+    margin-left: -5px;
+    width: calc(100% - 150px);
+    display: inline-block;
+}
+.cst_indi_review_user_title{
+    color: #4d4d4d;
+    font-size: 14px;
+    font-weight: 700;
+    margin: 8px 0 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-transform: capitalize;
+    text-overflow: ellipsis;
+    width: 105px;
+	margin: 0px !important;
+}
+.cst_indi_review_user_ver{
+	margin: 0 0 4px;
+    font-size: 11px;
+    color: rgba(0,0,0,.6);
+	margin: 0px !important;
+}
+.cst_verified{
+	font-family: 'revsglobal-pr-mod' !important;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+}
+i.cst_verified:before {
+    content: "\e607";
+}
+.cst_avatar_verifiedBadge{
+	position: relative;
+}
+.cst_verifiedBadge_wrapper{
+	background: #3cbb90;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    font-size: 14px;
+    display: inline-block;
+    color: #fff;
+    position: absolute;
+    left: 70px;
+    top: -15px;
+}
+.cst_indi_review_gravtar_ratings {
+    text-align: center;
+}
+.cst_indi_review_name {
+    width: 70%;
+    margin: auto;
+}
+.cst_indi_review_text p{
+	color: #4d4d4d;
+    font-size: 13px;
+    margin: 10px 0;
+    padding: 0 1%;
+}
+.overallRating{
+	display: inline-block;
+    font-size: 80px;
+    line-height: 80px;
+    margin-right: 30px;
+    font-weight: 100;
+    height: 80px;
+}
+.overallStarsWrap{
+height: 80px;
+    display: inline-block;
+    position: relative;
+    top: -7px;
+}
+.starsWrap{
+    font-size: 26px;
+    letter-spacing: 6px;
+}
+.numReviews {
+	text-align:center;
+}
+.cst_pagination_cvr {
+    background-color: transparent;
+    border-top: 1px solid #ebebeb;
+	border-bottom: 1px solid #ebebeb;
+    float: left;
+    margin: 0;
+    text-align: center;
+    width: 100%;
+}
+.cst_pagination_cvr ul {
+    display: inline-block;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    margin: 10px 0 5px;
+}
+.cst_pagination_cvr ul li {
+    float: left;
+    font-size: 15px;
+    line-height: 15px;
+    margin: 5px 3px;
+   padding: 3px 6px;
+    cursor: pointer;
+    color: #737373;
+}
+.cst_indi_review, .ratingLogoWrap {
+	border-bottom: 1px solid #ebebeb;
+    margin-bottom: 23px;
+}
+.cst_indi_review:last-child{
+	border-bottom: 0px;
+   margin-bottom: 10px;
+}
+.ruk-icon-arrow-right-1-01 {
+    font-family: 'revsglobal-pr-mod' !important;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.ruk-icon-arrow-right-1-01:before {
+    content: "\e623";
+}
+li.cst_curr {
+    background: #eee;
+	cursor: auto !important;
+}
+
+.modal {
+  display: none; /* Hidden by default */ 
+  position: fixed; /* Stay in place */
+  z-index: 99; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  overflow-y: scroll;
+  max-height: 500px;
+}
+
+
+.close_modal {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close_modal:hover,
+.close_modal:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.cst_pagination_cvr_review {
+    background-color: transparent;
+    border-top: 1px solid #ebebeb;
+	border-bottom: 1px solid #ebebeb;
+    float: left;
+    margin: 0;
+    text-align: center;
+    width: 100%;
+}
+
+.cst_pagination_cvr_review ul li {
+    float: left;
+    font-size: 15px;
+    line-height: 15px;
+    margin: 5px 3px;
+   padding: 3px 6px;
+    cursor: pointer;
+    color: #737373;
+}
+
+.cst_pagination_cvr_review ul {
+    display: inline-block;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+span.fa.fa-star.half:before {
+    color: orange;
+    position: absolute;
+    width: 13px;
+    overflow: hidden;
+}
+span.fa.fa-star.half:after {
+    content: '';
+    content: "\f005";
+    color: grey;
+}
+span.fa.fa-star.third:before {
+    color: orange;
+    position: absolute;
+    width: 15px;
+    overflow: hidden;
+}
+span.fa.fa-star.third:after {
+    content: '';
+    content: "\f005";
+    color: grey;
+}
+.ast-article-single .fa-star{
+	font-size: 18px;
+}
+.ast-article-single .starsWrap {
+    letter-spacing: 0px;
+}
+.ast-article-single .overallStarsWrap{
+	height: auto;
+	cursor:pointer;
+}
+.cst_ratingLogoWrap .cst_overallStatsWrap {
+	position: relative;
+    float: left;
+    height: 39px;
+    width: 100%;
+}
+.cst_ratingLogoWrap .cst_overallStarsWrap {
+	position: absolute;
+    top: 0px;
+    left: 24%;
+}
+
+span.fa.fa-star.first:before {    
+    color: orange;
+    position: absolute;
+    width: 2px;
+    overflow: hidden;
+}
+span.fa.fa-star.secound:before {
+    color: orange;
+    position: absolute;
+    width: 3px;
+    overflow: hidden;
+}
+span.fa.fa-star.third:before {
+    color: orange;
+    position: absolute;
+    width: 5px;
+    overflow: hidden;
+}
+span.fa.fa-star.fourth:before {
+    color: orange;
+    position: absolute;
+    width: 6px;
+    overflow: hidden;
+}
+span.fa.fa-star.fifth:before {
+    color: orange;
+    position: absolute;
+    width: 8px;
+    overflow: hidden;
+}
+span.fa.fa-star.sixth:before {    
+    color: orange;
+    position: absolute;
+    width: 10px;
+    overflow: hidden;
+}
+span.fa.fa-star.seventh:before {
+    color: orange;
+    position: absolute;
+    width: 11px;
+    overflow: hidden;
+}
+span.fa.fa-star.eighth:before {
+    color: orange;
+    position: absolute;
+    width: 13px;
+    overflow: hidden;
+}
+span.fa.fa-star.nineth:before {
+    color: orange;
+    position: absolute;
+    width: 14px;
+    overflow: hidden;
+}
+span.fa.fa-star.tenth:before {
+    color: orange;
+    position: absolute;
+    width: 16px;
+    overflow: hidden;
+}
+
+
+span.fa.fa-star.first:after {    
+    content: '';
+    content: "\f005";
+    color: grey;
+}
+span.fa.fa-star.secound:after {
+    content: '';
+    content: "\f005";
+    color: grey;
+}
+span.fa.fa-star.third:after {
+    content: '';
+    content: "\f005";
+    color: grey;
+}
+span.fa.fa-star.fourth:after {
+    content: '';
+    content: "\f005";
+    color: grey;
+}
+span.fa.fa-star.fifth:after {
+   content: '';
+    content: "\f005";
+    color: grey;
+}
+span.fa.fa-star.sixth:after {    
+    content: '';
+    content: "\f005";
+    color: grey;
+}
+span.fa.fa-star.seventh:after {
+    content: '';
+    content: "\f005";
+    color: grey;
+}
+span.fa.fa-star.eighth:after {
+    content: '';
+    content: "\f005";
+    color: grey;
+}
+span.fa.fa-star.nineth:after {
+    content: '';
+    content: "\f005";
+    color: grey;
+}
+span.fa.fa-star.tenth:after {
+    content: '';
+    content: "\f005";
+    color: grey;
+}
