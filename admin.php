@@ -18,7 +18,83 @@ class RIO_Admin {
 
 		add_action('admin_init', array($this, 'register_settings'));
 
+
+		/* Add a store column to the offer list */
+
+		add_filter('manage_' . $this->base->type . '_posts_columns', function($columns) {
+
+			if (!empty($columns['date'])) {
+				$date = $columns['date'];
+				unset($columns['date']);
+			} else {
+				$date = '';
+			}
+
+			$columns['product'] = 'Product';
+
+			if ($date) {
+				$columns['date'] = $date;
+			}
+
+			return $columns;
+
+		});
+
+
+		/* Display the column value */
+
+		add_action('manage_' . $this->base->type . '_posts_custom_column', function($column, $post_id) {
+
+			if ($column == 'product') {
+
+				$product_id = intval(get_post_meta($post_id, 'review_product', true));
+
+				if ($product_id > 0) {
+
+					$product = get_post($product_id);
+
+					if ($product instanceof WP_Post) {
+						echo '<a href="/wp-admin/post.php?action=edit&post=' . $product_id . '">' . $product->post_title . '</a>';
+					}
+
+				} else {
+
+					echo 'Store';
+
+				}
+
+			}
+
+		}, 10, 2);
+
+
+		/* Sort reviews by product */
+
+		add_filter('manage_edit-' . $this->base->type . '_sortable_columns', function($columns) {
+
+			$columns['product'] = 'product';
+
+			return $columns;
+
+		});
+
+		add_action('pre_get_posts', function($query) {
+
+			if (is_admin() and $query->get('post_type') == $this->base->type) {
+
+				$order = $query->get('orderby');
+
+				if ($order == 'product') {
+					$query->set('meta_key', 'review_product');
+					$query->set('orderby', 'meta_value_num');
+				}
+
+			}
+
+		});
+
 	}
+
 
 	/* Add an item to the admin menu */
 
