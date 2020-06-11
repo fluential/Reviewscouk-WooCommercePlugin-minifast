@@ -1,12 +1,18 @@
 <?php
 
-class RIO_Base {
+namespace RIO;
+
+class Base {
+
+	public static $instance = false;
 
 	public $id = 'rio';
 
 	public $api;
 
 	public $log;
+
+	public $woo;
 
 	public $admin;
 
@@ -16,7 +22,19 @@ class RIO_Base {
 
 	public $event = 'rio_sync_event';
 
-	public static $instance = false;
+
+	protected function __construct() {
+
+		$this->api = new API($this);
+
+		$this->log = new Logs($this);
+
+		$this->woo = new Woo($this);
+
+		$this->admin = new Admin($this);
+
+	}
+
 
 	public static function getInstance() {
 
@@ -25,17 +43,6 @@ class RIO_Base {
 		}
 
 		return self::$instance;
-
-	}
-
-
-	protected function __construct() {
-
-		$this->api = new RIO_API($this);
-
-		$this->log = new RIO_Logs($this);
-
-		$this->admin = new RIO_Admin($this);
 
 	}
 
@@ -96,7 +103,8 @@ class RIO_Base {
 
 		}, 100);
 
-		add_action('wp_enqueue_scripts', array($this, 'assets'));
+		$this->woo->init();
+		$this->admin->init();
 
 	}
 
@@ -111,7 +119,7 @@ class RIO_Base {
 
 		$sync_started = intval(get_option($key, 0));
 
-		if ($time - $sync_started > 5 * 60) {
+		if (true or $time - $sync_started > 5 * 60) {
 
 			update_option($key, $time);
 
@@ -119,8 +127,11 @@ class RIO_Base {
 
 			$products = $this->getProductIds();
 
-			$reviews = $this->api->getAllProductReviews();
+			$parents = $this->getParentProducts();
+
 			$existing = $this->getExistingReviewIds();
+
+			$reviews = $this->api->getAllProductReviews();
 
 			$this->log->info('Total products count: <b>' . count($products) . '</b>');
 
@@ -134,6 +145,14 @@ class RIO_Base {
 
 						$rating = 0;
 						$count = count($reviews[$sku]);
+
+						// We should use the main product ID instead of variation ID
+
+						if (!empty($parents[$product_id])) {
+							$product_id = intval($parents[$product_id]);
+						} else {
+							$product_id = intval($product_id);
+						}
 
 						foreach ($reviews[$sku] as $review) {
 
@@ -164,7 +183,7 @@ class RIO_Base {
 
 								$post_id = wp_insert_post($args);
 
-								if ($post_id instanceof WP_Error) {
+								if ($post_id instanceof \WP_Error) {
 									$this->log->error('Failed to add a review: <b>' . $post_id->get_error_message() . '</b>');
 								} else {
 									$this->log->info('Added a new review: <b>#' . $review['product_review_id'] . '</b>');
@@ -174,7 +193,7 @@ class RIO_Base {
 
 						}
 
-						$rating = round($rating/$count, 2);
+						$rating = round($rating / $count, 2);
 
 						update_post_meta($product_id, 'rating_count', $count);
 						update_post_meta($product_id, 'rating_value', $rating);
@@ -225,7 +244,7 @@ class RIO_Base {
 
 						$post_id = wp_insert_post($args);
 
-						if ($post_id instanceof WP_Error) {
+						if ($post_id instanceof \WP_Error) {
 							$this->log->error('Failed to add a review: <b>' . $post_id->get_error_message() . '</b>');
 						} else {
 							$this->log->info('Added a new merchant review: <b>#' . $review['store_review_id'] . '</b>');
@@ -272,6 +291,27 @@ class RIO_Base {
 	}
 
 
+	public function getParentProducts() {
+
+		global $wpdb;
+
+		$result = $wpdb->get_results("SELECT ID, post_parent FROM {$wpdb->posts} WHERE post_type = 'product_variation'", ARRAY_A);
+
+		$data = array();
+
+		if ($result) {
+			foreach ($result as $item) {
+				if (!empty($item['ID']) and !empty($item['post_parent'])) {
+					$data[$item['ID']] = intval($item['post_parent']);
+				}
+			}
+		}
+
+		return $data;
+
+	}
+
+
 	public function getExistingReviewIds() {
 
 		global $wpdb;
@@ -293,7 +333,118 @@ class RIO_Base {
 	}
 
 
+	public function getReviewsQuery($data = array()) {
+
+		$defaults = array(
+			'product_id' => 0,
+			'number' => 5,
+			'offset' => 0,
+			'status' => 'publish',
+		);
+
+		$args = wp_parse_args($data, $defaults);
+
+		$array = array(
+			'post_type' => $this->type,
+			'post_status' => $args['status'],
+			'posts_per_page' => intval($args['number']),
+		);
+
+		if ($args['product_id'] > 0) {
+
+			$array['meta_query'] = array(
+				array(
+					'key' => 'review_product',
+					'value' => intval($args['product_id']),
+					'compare' => '=',
+					'type' => 'NUMERIC'
+				)
+			);
+
+		}
+
+		if ($args['offset']) {
+			$array['offset'] = intval($args['offset']);
+		}
+
+		return new \WP_Query($array);
+
+	}
+
+
+	public function getTemplate($template, $data = array()) {
+
+		if ($data) {
+			extract($data, EXTR_SKIP);
+		}
+
+		$filename = __DIR__ . '/templates/' . $template . '.php';
+
+		if (file_exists($filename)) {
+
+			include $filename;
+
+		}
+
+	}
+
+
 	/* Get all settings */
+
+	public function cronDeactivate() {
+
+		wp_clear_scheduled_hook($this->event);
+
+	}
+
+	public function cronActivate() {
+
+		if (!wp_next_scheduled($this->event)) {
+
+			$interval = $this->getSetting('interval');
+
+			if (empty($interval)) {
+				$interval = 'hourly';
+			}
+
+			$time = time();
+
+			$schedules = wp_get_schedules();
+
+			if (!empty($schedules[$interval])) {
+				$schedule = $schedules[$interval];
+			} else {
+				$schedule = array_shift($schedule);
+			}
+
+			if (!empty($schedule['interval'])) {
+				$time += intval($schedule['interval']);
+			}
+
+			wp_schedule_event($time, $interval, $this->event);
+
+		}
+
+	}
+
+	public function getSetting($name) {
+
+		$settings = $this->getSettings();
+
+		$field = $this->id . '_' . $name;
+
+		if (is_array($settings) and !empty($settings[$field])) {
+			$result = $settings[$field]['value'];
+		} else {
+			$result = get_option($field, false);
+		}
+
+		return $result;
+
+	}
+
+
+	/* Add a cron event on plugin activation */
 
 	public function getSettings() {
 
@@ -369,21 +520,8 @@ class RIO_Base {
 
 	}
 
-	public function getSetting($name) {
 
-		$settings = $this->getSettings();
-
-		$field = $this->id . '_' . $name;
-
-		if (is_array($settings) and !empty($settings[$field])) {
-			$result = $settings[$field]['value'];
-		} else {
-			$result = get_option($field, false);
-		}
-
-		return $result;
-
-	}
+	/* Remove a cron event on plugin deactivation */
 
 	public function updateSetting($name, $value) {
 
@@ -394,59 +532,6 @@ class RIO_Base {
 		if (!empty($this->settings[$field])) {
 			$this->settings[$field]['value'] = $value;
 		}
-
-	}
-
-
-	/* Enqueue assets */
-
-	public function assets() {
-		if (!is_admin()) {
-			$dir = plugin_dir_url(__FILE__) . 'assets/';
-			wp_enqueue_style('rio_styles', $dir . '/styles.css');
-			wp_enqueue_script('rio_scripts', $dir . '/scripts.js', array('jquery'), false, true);
-		}
-	}
-
-
-	/* Add a cron event on plugin activation */
-
-	public function cronActivate() {
-
-		if (!wp_next_scheduled($this->event)) {
-
-			$interval = $this->getSetting('interval');
-
-			if (empty($interval)) {
-				$interval = 'hourly';
-			}
-
-			$time = time();
-
-			$schedules = wp_get_schedules();
-
-			if (!empty($schedules[$interval])) {
-				$schedule = $schedules[$interval];
-			} else {
-				$schedule = array_shift($schedule);
-			}
-
-			if (!empty($schedule['interval'])) {
-				$time += intval($schedule['interval']);
-			}
-
-			wp_schedule_event($time, $interval, $this->event);
-
-		}
-
-	}
-
-
-	/* Remove a cron event on plugin deactivation */
-
-	public function cronDeactivate() {
-
-		wp_clear_scheduled_hook($this->event);
 
 	}
 
@@ -471,160 +556,7 @@ class RIO_Base {
 
 }
 
-
 /*
-add_action('wp_enqueue_scripts', 'fwds_styles2');
-function fwds_styles2() {
-
-	$version = rand(10, 10000);
-	wp_register_style('slidesjs_example', plugins_url('/assets/css/style.css', __FILE__), array(), $version);
-	wp_enqueue_style('slidesjs_example');
-	wp_register_style('fontawesome-css', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
-	wp_enqueue_style('fontawesome-css');
-	wp_enqueue_script('cst_custom', plugins_url('/assets/js/custom.js', __FILE__), array("jquery"), $version);
-	wp_localize_script('cst_custom', 'ajaxobj', array(
-		'pro_id' => get_the_ID(),
-		'ajaxurl' => admin_url('admin-ajax.php'),
-	));
-}
-
-
-add_action('init', 'cst_init');
-function cst_init() {
-
-	add_filter('woocommerce_product_tabs', 'cst_product_review_tab');
-}
-
-
-function cst_product_review_tab($tabs) {
-
-	$tabs['reviews'] = array(
-		'title' => 'Reviews',
-		'callback' => 'reviews_shortcode_function',
-		'priority' => 50,
-	);
-
-	return $tabs;
-}
-
-
-add_shortcode('wpb_custom_cron_short_code', 'wpb_custom_cron_func');
-// Don't delete "wpb_custom_cron_func11" function, 
-//this function fetch published products and fetch reviews then store in db
-function wpb_custom_cron_func() {
-
-	$args = array(
-		'post_status' => 'publish',
-		'post_type' => 'product'
-	);
-	$sku = "";
-	$posts_array = get_posts($args);
-
-	foreach ($posts_array as $post) {
-
-		$product_ID = $post->ID;
-		$product = wc_get_product($product_ID);
-		if ($product->is_type('variable')) {
-			foreach ($product->get_children() as $variable_pro) {
-				if (!empty($sku)) {
-					$sku .= ";" . get_post_meta($variable_pro, "_sku", true);
-				} else {
-					$sku = get_post_meta($variable_pro, "_sku", true);
-				}
-			}
-		} else {
-			$sku = get_post_meta($product_ID, "_sku", true);
-		}
-		if (!empty($sku)) {
-
-			//$product_ID = 5;
-			//$sku = 7350092800037;
-			$url = 'https://api.reviews.io/product/review?store=probion-com&sku=' . $sku;
-			$http = _wp_http_get_object();
-			$res = $http->get($url);
-			$res_data = wp_remote_retrieve_body($res);
-			$res_data_decoded = json_decode($res_data);
-			$stats = $res_data_decoded->stats;
-			//add_post_meta(1,rand(), $aa);
-			$product_stats_average = $stats->average;
-			$product_stats_count = $stats->count;
-			$product_stats_sku = $sku;
-			$review_count = 0;
-			if (!empty($product_stats_average)) {
-				update_post_meta($product_ID, 'product_stats_average', $product_stats_average);
-			}
-			if (!empty($product_stats_count)) {
-				update_post_meta($product_ID, 'product_stats_count', $product_stats_count);
-			}
-			if (!empty($product_stats_sku)) {
-				update_post_meta($product_ID, 'product_stats_sku', $product_stats_sku);
-			}
-			$reviews = $res_data_decoded->reviews;
-
-			if (!empty($reviews)) {
-				$reviews_data = $reviews->data;
-
-				if (!empty($reviews_data) && count($reviews_data) > 0) {
-
-					foreach ($reviews_data as $review_data) {
-						$review_product_review_id = $review_data->product_review_id;
-
-						$result = get_page_by_title($review_data->product_review_id, OBJECT, 'custom_reviews');
-
-						if (empty($result) || is_null($result)) {
-							$review_count = count($reviews_data);
-							$review_vote = $review_data->votes;
-							$review_flags = $review_data->flags;
-							$review_title = $review_data->title;
-							$review_review = $review_data->review;
-							$review_sku = $review_data->sku;
-							$review_rating = $review_data->rating;
-							$review_date_created = $review_data->date_created;
-							$review_timeago = $review_data->timeago;
-							$reviewer_first_name = $review_data->reviewer->first_name;
-							$reviewer_last_name = $review_data->reviewer->last_name;
-							$reviewer_verified_buyer = $review_data->reviewer->verified_buyer;
-							$reviewer_address = $review_data->reviewer->address;
-							$reviewer_profile_picture = $review_data->reviewer->profile_picture;
-							$reviewer_gravatar = $review_data->reviewer->gravatar;
-
-							$new_post = array(
-								'post_title' => $review_product_review_id,
-								'post_status' => 'publish',
-								'post_type' => 'custom_reviews'
-							);
-							$postId = wp_insert_post($new_post);
-							add_post_meta($postId, 'results', json_encode($result));
-							add_post_meta($postId, 'review_vote', $review_vote);
-							add_post_meta($postId, 'review_flags', $review_flags);
-							add_post_meta($postId, 'review_title', $review_title);
-							add_post_meta($postId, 'review_review', $review_review);
-							add_post_meta($postId, 'review_sku', $review_sku);
-							add_post_meta($postId, 'review_rating', $review_rating);
-							add_post_meta($postId, 'review_date_created', $review_date_created);
-							add_post_meta($postId, 'review_timeago', $review_timeago);
-							add_post_meta($postId, 'reviewer_first_name', $reviewer_first_name);
-							add_post_meta($postId, 'reviewer_last_name', $reviewer_last_name);
-							add_post_meta($postId, 'reviewer_verified_buyer', $reviewer_verified_buyer);
-							add_post_meta($postId, 'reviewer_address', $reviewer_address);
-							add_post_meta($postId, 'reviewer_profile_picture', $reviewer_profile_picture);
-							add_post_meta($postId, 'reviewer_gravatar', $reviewer_gravatar);
-							add_post_meta($postId, 'review_product_review_id', $review_product_review_id);
-							add_post_meta($postId, 'review_product_id', $product_ID);
-						}
-					}
-				}
-			}
-		}
-	}
-	if ($review_count) {
-		echo "Total " . $review_count . " fetched";
-	} else {
-		echo "No new review fetched";
-	}
-}
-
-
 add_action('wp_ajax_more_reviews', 'reviews_shortcode_function');
 add_action('wp_ajax_nopriv_more_reviews', 'reviews_shortcode_function');
 add_shortcode('reviews_shortcode', 'reviews_shortcode_function');
@@ -797,16 +729,6 @@ function cst_custom_menu() {
 
 	add_menu_page('Get Reviews', 'Get Reviews', 'edit_posts', 'cst_get_reviews', 'cst_callback_function', 'dashicons-media-spreadsheet');
 }
-
-
-function cst_callback_function() {
-
-	echo '<form style="padding: 20px;" method="POST"><input type="hidden" name="get_reviews_form"><input type="submit" value="Get Reviews"></form>';
-	if (isset($_POST['get_reviews_form'])) {
-		wpb_custom_cron_func();
-	}
-}
-
 
 add_action('wp_ajax_more_popup_reviews', 'generate_reviews');
 add_action('wp_ajax_nopriv_more_popup_reviews', 'generate_reviews');
@@ -1062,5 +984,4 @@ function mycustomfuncion() {
 	$out .= '</div>';
 	echo $out;
 }
-
 */

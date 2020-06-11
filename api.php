@@ -1,7 +1,8 @@
 <?php
 
+namespace RIO;
 
-class RIO_API {
+class API {
 
 	public $url = 'https://api.reviews.io/';
 
@@ -13,7 +14,7 @@ class RIO_API {
 
 	protected $store_id;
 
-	public function __construct(RIO_Base $base) {
+	public function __construct(Base $base) {
 
 		$this->log = $base->log;
 		$this->base = $base;

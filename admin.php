@@ -1,6 +1,8 @@
 <?php
 
-class RIO_Admin {
+namespace RIO;
+
+class Admin {
 
 	public $log;
 
@@ -8,11 +10,17 @@ class RIO_Admin {
 
 	public $slug = 'rio_settings';
 
-	public function __construct(RIO_Base $base) {
+
+	public function __construct(Base $base) {
 
 		$this->log = $base->log;
 
 		$this->base = $base;
+
+	}
+
+
+	public function init() {
 
 		add_action('admin_menu', array($this, 'admin_menu'), 100);
 

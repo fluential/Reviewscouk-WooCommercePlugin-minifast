@@ -11,11 +11,14 @@ License:		GPL-2.0+
 License URI:	http://www.gnu.org/licenses/gpl-2.0.txt
 */
 
+namespace RIO;
+
 include __DIR__ . '/base.php';
+include __DIR__ . '/woo.php';
 include __DIR__ . '/admin.php';
 include __DIR__ . '/logs.php';
 include __DIR__ . '/api.php';
 
-$sync = RIO_Base::getInstance();
+$sync = Base::getInstance();
 
 $sync->init();

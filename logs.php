@@ -1,7 +1,8 @@
 <?php
 
+namespace RIO;
 
-class RIO_Logs {
+class Logs {
 
 	const INFO = 'info';
 
@@ -12,7 +13,7 @@ class RIO_Logs {
 	public $logs = array();
 
 
-	public function __construct(RIO_Base $base) {
+	public function __construct(Base $base) {
 
 		$this->base = $base;
 
