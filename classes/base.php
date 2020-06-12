@@ -135,7 +135,7 @@ class Base {
 
 			$this->log->info('Total products count: <b>' . count($products) . '</b>');
 
-			$this->log->info('Product reviews count: <b>' . count($reviews) . '</b>');
+			$total = 0;
 
 			if ($reviews and $products) {
 
@@ -157,6 +157,8 @@ class Base {
 						foreach ($reviews[$sku] as $review) {
 
 							$rating += intval($review['rating']);
+
+							$total++;
 
 							if (empty($existing[$review['product_review_id']])) {
 
@@ -203,6 +205,8 @@ class Base {
 				}
 
 			}
+
+			$this->log->info('Product reviews processed: <b>' . $total . '</b>');
 
 			$this->log->info('Product reviews sync finished on <b>' . date('F j, Y, H:i:s', $time + $offset) . '</b>');
 
@@ -270,6 +274,27 @@ class Base {
 	}
 
 
+	public function getProductIds() {
+
+		$db = $this->getDb();
+
+		$result = $db->get_results("SELECT post_id, meta_value FROM {$db->postmeta} WHERE meta_key = '_sku'", ARRAY_A);
+
+		$data = array();
+
+		if ($result) {
+			foreach ($result as $item) {
+				if (!empty($item['meta_value']) and !empty($item['post_id'])) {
+					$data[$item['meta_value']] = intval($item['post_id']);
+				}
+			}
+		}
+
+		return $data;
+
+	}
+
+
 	public function getDb() {
 
 		global $wpdb;
@@ -288,26 +313,6 @@ class Base {
 			return new \wpdb($dbuser, $dbpassword, $dbname, $dbhost);
 
 		}
-
-	}
-
-	public function getProductIds() {
-
-		$db = $this->getDb();
-
-		$result = $db->get_results("SELECT post_id, meta_value FROM {$db->postmeta} WHERE meta_key = '_sku'", ARRAY_A);
-
-		$data = array();
-
-		if ($result) {
-			foreach ($result as $item) {
-				if (!empty($item['meta_value']) and !empty($item['post_id'])) {
-					$data[$item['meta_value']] = intval($item['post_id']);
-				}
-			}
-		}
-
-		return $data;
 
 	}
 
@@ -354,64 +359,6 @@ class Base {
 	}
 
 
-	public function getReviewsQuery($data = array()) {
-
-		$defaults = array(
-			'product_id' => 0,
-			'number' => 5,
-			'offset' => 0,
-			'status' => 'publish',
-		);
-
-		$args = wp_parse_args($data, $defaults);
-
-		$array = array(
-			'post_type' => $this->type,
-			'post_status' => $args['status'],
-			'posts_per_page' => intval($args['number']),
-		);
-
-		if ($args['product_id'] >= 0) {
-
-			$array['meta_query'] = array(
-				array(
-					'key' => 'review_product',
-					'value' => intval($args['product_id']),
-					'compare' => '=',
-					'type' => 'NUMERIC'
-				)
-			);
-
-		}
-
-		if ($args['offset']) {
-			$array['offset'] = intval($args['offset']);
-		}
-
-		return new \WP_Query($array);
-
-	}
-
-
-	public function getTemplate($template, $data = array()) {
-
-		if ($data) {
-			extract($data, EXTR_SKIP);
-		}
-
-		$filename = RIO_DIR . '/templates/' . $template . '.php';
-
-		if (file_exists($filename)) {
-
-			include $filename;
-
-		}
-
-	}
-
-
-	/* Get all settings */
-
 	public function cronDeactivate() {
 
 		wp_clear_scheduled_hook($this->event);
@@ -448,6 +395,9 @@ class Base {
 
 	}
 
+
+	/* Get all settings */
+
 	public function getSetting($name) {
 
 		$settings = $this->getSettings();
@@ -463,9 +413,6 @@ class Base {
 		return $result;
 
 	}
-
-
-	/* Add a cron event on plugin activation */
 
 	public function getSettings() {
 
@@ -553,6 +500,63 @@ class Base {
 		}
 
 		return $this->settings;
+
+	}
+
+	public function getReviewsQuery($data = array()) {
+
+		$defaults = array(
+			'product_id' => 0,
+			'number' => 5,
+			'offset' => 0,
+			'status' => 'publish',
+		);
+
+		$args = wp_parse_args($data, $defaults);
+
+		$array = array(
+			'post_type' => $this->type,
+			'post_status' => $args['status'],
+			'posts_per_page' => intval($args['number']),
+		);
+
+		if ($args['product_id'] >= 0) {
+
+			$array['meta_query'] = array(
+				array(
+					'key' => 'review_product',
+					'value' => intval($args['product_id']),
+					'compare' => '=',
+					'type' => 'NUMERIC'
+				)
+			);
+
+		}
+
+		if ($args['offset']) {
+			$array['offset'] = intval($args['offset']);
+		}
+
+		return new \WP_Query($array);
+
+	}
+
+
+	/* Add a cron event on plugin activation */
+
+	public function getTemplate($template, $data = array()) {
+
+		if ($data) {
+			extract($data, EXTR_SKIP);
+		}
+
+		$filename = RIO_DIR . '/templates/' . $template . '.php';
+
+		if (file_exists($filename)) {
+
+			include $filename;
+
+		}
 
 	}
 
