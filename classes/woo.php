@@ -25,10 +25,16 @@ class Woo {
 
 		// Replace the product rating
 		remove_action('woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_rating', 5);
+		remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_rating', 10);
+
 		add_action('woocommerce_after_shop_loop_item_title', array($this, 'productRating'));
+		add_action('woocommerce_single_product_summary', array($this, 'productRating'), 8);
 
 		// Add product reviews to the product schema
-		add_filter('woocommerce_structured_data_product', array($this, 'schemaProduct'), 10, 2);
+		add_filter('woocommerce_structured_data_product', array($this, 'markupProduct'), 10, 2);
+
+		// Output the store schema
+		add_action('wp_head', array($this, 'markupStore'));
 
 		// Add a custom AJAX handler to load more reviews
 		add_action('wp_ajax_nopriv_rio_load', array($this, 'loadHandler'));
@@ -327,7 +333,7 @@ class Woo {
 	}
 
 
-	public function schemaProduct($markup, $product) {
+	public function markupProduct($markup, $product) {
 
 		if ($product instanceof \WC_Product) {
 
@@ -414,6 +420,151 @@ class Woo {
 		wp_reset_postdata();
 
 		return $markup;
+
+	}
+
+
+	public function markupStore() {
+
+		$pages = $this->base->getSetting('pages');
+
+		if ($pages) {
+
+			$pages = explode("\n", $pages);
+
+			$pages = array_map('trim', $pages);
+
+			if (in_array($_SERVER['REQUEST_URI'], $pages)) {
+
+				$markup = array(
+					'@context' => 'http://schema.org',
+					'@type' => 'Store',
+					'name' => get_bloginfo('name'),
+					'url' => home_url(),
+					'image' => get_site_icon_url(),
+					'description' => get_bloginfo('description'),
+					'price_range' => '$$',
+					'potentialAction' => array(
+						'@type' => 'SearchAction',
+						'target' => home_url('?s={search_term_string}&post_type=product'),
+						'query-input' => 'required name=search_term_string',
+					),
+				);
+
+				$data = array(
+					'product_id' => 0,
+					'number' => -1
+				);
+
+				$query = $this->base->getReviewsQuery($data);
+
+				if ($query->have_posts()) {
+
+					$reviews = $query->posts;
+					$count = count($reviews);
+					$total = 0;
+
+					$markup['review'] = array();
+
+					foreach ($reviews as $review) {
+
+						if ($review instanceof \WP_Post) {
+
+							$first_name = get_post_meta($review->ID, 'review_first_name', true);
+							$last_name = get_post_meta($review->ID, 'review_last_name', true);
+							$gravatar = get_post_meta($review->ID, 'review_gravatar', true);
+							$rating = intval(get_post_meta($review->ID, 'review_rating', true));
+							$date = get_post_meta($review->ID, 'review_date', true);
+
+							if ($date) {
+								$date = strtotime($date);
+							} else {
+								$date = time() - rand(0, 100) * 3600 * 24;
+							}
+
+							if (empty($gravatar)) {
+								$gravatar = 'c8e57bdf509598c0a214f7b5c0b80bb3';
+							}
+
+							$name = $first_name;
+
+							if ($last_name) {
+								$name .= ' ' . $last_name;
+							}
+
+							$name = trim($name);
+
+							$markup['review'][] = array(
+								'@type' => 'Review',
+								'reviewRating' => array(
+									'@type' => 'Rating',
+									'bestRating' => '5',
+									'ratingValue' => $rating,
+									'worstRating' => '1',
+								),
+								'author' => array(
+									'@type' => 'Person',
+									'name' => $name,
+									'givenName' => $first_name,
+									'familyName' => $last_name,
+									'image' => 'https://www.gravatar.com/avatar/' . $gravatar
+								),
+								'reviewBody' => $review->post_content,
+								'datePublished' => date('c', $date),
+							);
+
+							$total += $rating;
+
+						}
+
+					}
+
+					$markup['aggregateRating'] = array(
+						'@type' => 'AggregateRating',
+						'ratingValue' => round($total / $count, 2),
+						'reviewCount' => $count,
+					);
+
+				}
+
+				if (function_exists('get_woocommerce_currency_symbol')) {
+
+					$markup['currenciesAccepted'] = get_woocommerce_currency();
+
+					$fields = array(
+						'woocommerce_store_address' => 'streetAddress',
+						'woocommerce_store_city' => 'addressLocality',
+						'woocommerce_store_postcode' => 'postalCode',
+						'woocommerce_default_country' => 'addressCountry',
+					);
+
+					$data = array();
+
+					foreach ($fields as $field => $property) {
+
+						$option = get_option($field);
+
+						if ($option) {
+							$data[$property] = $option;
+						}
+
+					}
+
+					if ($data) {
+
+						$markup['address'] = $data;
+
+						$markup['address']['@type'] = 'PostalAddress';
+
+					}
+
+				}
+
+				echo "<script type=\"application/ld+json\">\n" . json_encode($markup, JSON_UNESCAPED_SLASHES) . "\n</script>\n";
+
+			}
+
+		}
 
 	}
 

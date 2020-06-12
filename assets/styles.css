@@ -41,10 +41,6 @@
 	background: url("data:image/svg+xml,%3Csvg width='20' height='18' viewBox='0 0 20 18' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8.75004 1.63647L11.1963 6.48362L16.6667 7.26567L12.7084 11.0366L13.6425 16.3637L8.75004 13.8473L3.85754 16.3637L4.79171 11.0366L0.833374 7.26567L6.30379 6.48362L8.75004 1.63647Z' fill='%23c0c0c0'/%3E%3C/svg%3E%0A") 0 0 repeat-x;
 }
 
-.rio_stars {
-	margin: 10px auto 0;
-}
-
 .reviews_box .stars span, .rio_stars span {
 	display: block;
 	position: absolute;
@@ -208,6 +204,14 @@
 
 .reviews_box .wait span:nth-child(3n + 2) {
 	animation-delay: -0.32s;
+}
+
+.rio_stars {
+	margin: 10px 0 0;
+}
+
+.entry-summary .rio_stars {
+	margin-bottom: 10px;
 }
 
 @keyframes spinner {
