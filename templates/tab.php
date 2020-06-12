@@ -14,6 +14,10 @@
 
 	<div class="reviews_box">
 
+		<?php if (!empty($title)) { ?>
+			<h2><?php echo $title; ?></h2>
+		<?php } ?>
+		
 		<?php if ($query->have_posts()) { ?>
 
 			<?php if ($rating_count > 0) { ?>

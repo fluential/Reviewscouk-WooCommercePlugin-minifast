@@ -270,11 +270,32 @@ class Base {
 	}
 
 
-	public function getProductIds() {
+	public function getDb() {
 
 		global $wpdb;
 
-		$result = $wpdb->get_results("SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_sku'", ARRAY_A);
+		if ($wpdb instanceof \wpdb) {
+
+			return $wpdb;
+
+		} else {
+
+			$dbuser = defined('DB_USER') ? DB_USER : '';
+			$dbpassword = defined('DB_PASSWORD') ? DB_PASSWORD : '';
+			$dbname = defined('DB_NAME') ? DB_NAME : '';
+			$dbhost = defined('DB_HOST') ? DB_HOST : '';
+
+			return new \wpdb($dbuser, $dbpassword, $dbname, $dbhost);
+
+		}
+
+	}
+
+	public function getProductIds() {
+
+		$db = $this->getDb();
+
+		$result = $db->get_results("SELECT post_id, meta_value FROM {$db->postmeta} WHERE meta_key = '_sku'", ARRAY_A);
 
 		$data = array();
 
@@ -293,9 +314,9 @@ class Base {
 
 	public function getParentProducts() {
 
-		global $wpdb;
+		$db = $this->getDb();
 
-		$result = $wpdb->get_results("SELECT ID, post_parent FROM {$wpdb->posts} WHERE post_type = 'product_variation'", ARRAY_A);
+		$result = $db->get_results("SELECT ID, post_parent FROM {$db->posts} WHERE post_type = 'product_variation'", ARRAY_A);
 
 		$data = array();
 
@@ -314,9 +335,9 @@ class Base {
 
 	public function getExistingReviewIds() {
 
-		global $wpdb;
+		$db = $this->getDb();
 
-		$result = $wpdb->get_results("SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = 'review_id'", ARRAY_A);
+		$result = $db->get_results("SELECT post_id, meta_value FROM {$db->postmeta} WHERE meta_key = 'review_id'", ARRAY_A);
 
 		$data = array();
 
