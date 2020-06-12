@@ -20,26 +20,24 @@ class Woo {
 
 	public function init() {
 
+		// Enqueue required scripts and styles
 		add_action('wp_enqueue_scripts', array($this, 'assets'));
 
-		add_filter('woocommerce_product_tabs', function($tabs){
+		// Replace the product rating
+		remove_action('woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_rating', 5);
+		add_action('woocommerce_after_shop_loop_item_title', array($this, 'productRating'));
 
-			$tabs['reviews'] = array(
-				'title' => 'Reviews',
-				'callback' => array($this, 'reviewsTab'),
-				'priority' => 50,
-			);
-
-			return $tabs;
-
-		});
-
+		// Add product reviews to the product schema
 		add_filter('woocommerce_structured_data_product', array($this, 'schemaProduct'), 10, 2);
 
+		// Add a custom AJAX handler to load more reviews
 		add_action('wp_ajax_nopriv_rio_load', array($this, 'loadHandler'));
-
 		add_action('wp_ajax_rio_load', array($this, 'loadHandler'));
 
+		// Add a new tab with reviews
+		add_filter('woocommerce_product_tabs', array($this, 'productTabs'));
+
+		// Register a shortcode to display reviews
 		add_shortcode('rio_shortcode', array($this, 'reviewsShortcode'));
 
 	}
@@ -61,6 +59,46 @@ class Woo {
 			));
 
 		}
+
+	}
+
+
+	public function productRating() {
+
+		global $product;
+
+		if (!empty($product) and $product instanceof \WC_Product) {
+
+			$product_id = $product->get_id();
+
+			$rating = floatval(get_post_meta($product_id, 'rating_value', true));
+
+			if ($rating > 0) {
+
+				$stars = $this->base->getSetting('stars');
+
+				if (empty($stars)) {
+					echo '<div class="rio_stars"><span style="width: ' . ($rating * 20) . '%;"></span></div>';
+				} else {
+					echo wc_get_rating_html($rating);
+				}
+
+			}
+
+		}
+
+	}
+
+
+	public function productTabs($tabs) {
+
+		$tabs['reviews'] = array(
+			'title' => 'Reviews',
+			'callback' => array($this, 'reviewsTab'),
+			'priority' => 50,
+		);
+
+		return $tabs;
 
 	}
 

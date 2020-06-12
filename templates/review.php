@@ -28,7 +28,7 @@
 
 	?>
 
-	<div class="item" data-review-id="<?php echo $item->ID; ?>">
+	<div class="item">
 
 		<div class="author">
 

@@ -119,7 +119,7 @@ class Base {
 
 		$sync_started = intval(get_option($key, 0));
 
-		if (true or $time - $sync_started > 5 * 60) {
+		if ($time - $sync_started > 5 * 60) {
 
 			update_option($key, $time);
 
@@ -483,6 +483,15 @@ class Base {
 					'name' => 'API Key',
 					'type' => 'text',
 					'value' => ''
+				),
+				'stars' => array(
+					'name' => 'Stars',
+					'type' => 'select',
+					'value' => 0,
+					'values' => array(
+						0 => 'Plugin',
+						1 => 'Theme'
+					)
 				),
 				'interval' => array(
 					'name' => 'Synchronization Interval',

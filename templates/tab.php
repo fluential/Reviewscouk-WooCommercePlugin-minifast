@@ -36,7 +36,7 @@
 
 			<div class="items">
 				<?php foreach ($items as $item) { ?>
-					<?php $base->getTemplate('review', array('item' => $item)); ?>
+					<?php $base->getTemplate('review', array('item' => $item, 'base' => $base)); ?>
 				<?php } ?>
 			</div>
 
@@ -53,5 +53,5 @@
 		<?php } ?>
 		
 	</div>
-
+	
 <?php } ?>
