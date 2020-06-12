@@ -36,6 +36,12 @@ class Woo {
 
 		add_filter('woocommerce_structured_data_product', array($this, 'schemaProduct'), 10, 2);
 
+		add_action('wp_ajax_nopriv_rio_load', array($this, 'loadHandler'));
+
+		add_action('wp_ajax_rio_load', array($this, 'loadHandler'));
+
+		add_shortcode('rio_shortcode', array($this, 'reviewsShortcode'));
+
 	}
 
 
@@ -50,7 +56,7 @@ class Woo {
 			wp_enqueue_script('rio_scripts', RIO_URL . 'assets/scripts.js', array('jquery'), false, true);
 
 			wp_localize_script('rio_scripts', 'rio', array(
-				'product_id' => get_the_ID(),
+				'nonce' => wp_create_nonce('ajax-nonce'),
 				'ajaxurl' => admin_url('admin-ajax.php'),
 			));
 
@@ -71,7 +77,7 @@ class Woo {
 
 		$data = array(
 			'product_id' => $product_id,
-			'number' => 10
+			'number' => 5
 		);
 
 		$query = $this->base->getReviewsQuery($data);
@@ -80,6 +86,7 @@ class Woo {
 			'query' => $query,
 			'base' => $this->base,
 			'product_id' => $product_id,
+			'loader' => $this->loadButton($query),
 			'rating_count' => get_post_meta($product_id, 'rating_count', true),
 			'rating_value' => get_post_meta($product_id, 'rating_value', true),
 		);
@@ -87,6 +94,197 @@ class Woo {
 		$this->base->getTemplate('tab', $variables);
 
 		wp_reset_postdata();
+
+	}
+
+
+	public function reviewsShortcode($data) {
+
+		ob_start();
+
+		$data = wp_parse_args($data,array(
+			'product_id' => 0,
+			'number' => 5,
+		));
+
+		if (!empty($data['product_id'])) {
+			$product_id = intval($data['product_id']);
+		} else {
+			$product_id = 0;
+		}
+
+		$query = $this->base->getReviewsQuery($data);
+
+		$variables = array(
+			'query' => $query,
+			'base' => $this->base,
+			'product_id' => $product_id,
+			'loader' => $this->loadButton($query),
+			'rating_count' => get_post_meta($product_id, 'rating_count', true),
+			'rating_value' => get_post_meta($product_id, 'rating_value', true),
+		);
+
+		$this->base->getTemplate('tab', $variables);
+
+		wp_reset_postdata();
+
+		$result = ob_get_contents();
+
+		ob_end_clean();
+
+		return $result;
+
+	}
+
+
+	public function loadHandler() {
+
+		$result = array(
+			'result' => '',
+			'more' => false
+		);
+
+		if (isset($_POST['noncer']) and wp_verify_nonce($_POST['noncer'], 'ajax-nonce')) {
+
+			$fields = array('offset', 'number');
+
+			$params = array();
+
+			foreach ($fields as $field) {
+				if (isset($_REQUEST[$field])) {
+					$params[$field] = intval($_REQUEST[$field]);
+				} else {
+					$params[$field] = 0;
+				}
+			}
+
+			if ($params['number'] > 0) {
+
+				$args = array(
+					'post_type' => $this->base->type,
+					'post_status' => 'publish',
+					'offset' => $params['offset'],
+					'posts_per_page' => $params['number']
+				);
+
+				if (!empty($_REQUEST['query_meta']) and is_array($_REQUEST['query_meta'])) {
+					$args['meta_query'] = $_REQUEST['query_meta'];
+				}
+
+				if (!empty($_REQUEST['query_order']) and is_array($_REQUEST['query_order'])) {
+
+					foreach ($_REQUEST['query_order'] as $key => $value) {
+						$key = trim(esc_attr($key));
+						$value = trim(esc_attr($value));
+						$args['orderby'][$key] = $value;
+					}
+
+				}
+
+				if (!empty($_REQUEST['query_direction']) and in_array($_REQUEST['query_direction'], array('ASC', 'DESC'))) {
+					$args['order'] = $_REQUEST['query_direction'];
+				}
+
+				if (!empty($_REQUEST['order']) and in_array($_REQUEST['order'], array('date', 'title', 'author'))) {
+
+					$order = esc_attr($_REQUEST['order']);
+
+					$args['orderby'] = $order;
+
+					$args['order'] = 'DESC';
+
+					if ($order == 'title') {
+						$args['order'] = 'ASC';
+					}
+
+					if (is_array($args['orderby'])) {
+						$args['orderby'][$order] = $args['order'];
+					} else {
+						$args['orderby'] = array(
+							$order => $args['order']
+						);
+					}
+
+				}
+
+				$query = new \WP_Query($args);
+
+				if ($query->have_posts()) {
+
+					if (($params['number'] + $params['offset']) < $query->found_posts) {
+						$result['more'] = true;
+					}
+
+					ob_start();
+
+					while ($query->have_posts()) {
+
+						$query->the_post();
+
+						$this->base->getTemplate('review', array('item' => $query->post));
+
+					}
+
+					$result['result'] = ob_get_contents();
+
+				} else {
+
+					$result['result'] = '<div class="message">Nothing had been found</div>';
+
+				}
+
+				ob_end_clean();
+
+				wp_reset_postdata();
+
+			}
+
+		}
+
+		wp_send_json($result);
+
+	}
+
+
+	public function loadButton($query) {
+
+		$result = '';
+
+		if ($query instanceof \WP_Query) {
+
+			$number = intval($query->query_vars['posts_per_page']);
+
+			$paged = intval($query->query_vars['paged']);
+
+			if ($paged == 0) {
+				$paged = 1;
+			}
+
+			$offset = $paged * $number;
+
+			$hidden = true;
+
+			if ($offset < $query->found_posts) {
+				$hidden = false;
+			}
+
+			$args = array(
+				'number' => $number,
+				'offset' => $offset,
+				'wrapper' => '.reviews_box',
+				'query_meta' => $query->get('meta_query'),
+				'query_order' => $query->get('orderby'),
+				'query_direction' => $query->get('order')
+			);
+
+			$result = '
+			<div class="load">
+				<div class="button' . ($hidden ? ' hidden' : '') . '" data-loader="' . htmlspecialchars(json_encode($args), ENT_QUOTES, 'UTF-8') . '">Show More</div>
+			</div>';
+
+		}
+
+		return $result;
 
 	}
 

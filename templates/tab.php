@@ -48,6 +48,10 @@
 
 		<?php } ?>
 
+		<?php if (!empty($loader)) { ?>
+			<?php echo $loader; ?>
+		<?php } ?>
+		
 	</div>
 
 <?php } ?>
