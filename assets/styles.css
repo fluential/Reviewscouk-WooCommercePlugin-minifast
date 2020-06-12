@@ -113,8 +113,15 @@
 
 .reviews_box .name {
 	display: block;
-	margin-bottom: 5px;
+	margin-bottom: 6px;
 	font-weight: 600;
+}
+
+.reviews_box .date {
+	display: block;
+	margin-top: 5px;
+	font-size: 12px;
+	font-weight: 500;
 }
 
 .reviews_box .content {

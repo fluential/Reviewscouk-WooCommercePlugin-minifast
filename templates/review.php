@@ -6,7 +6,13 @@
 	$verified = get_post_meta($item->ID, 'review_verified', true);
 	$gravatar = get_post_meta($item->ID, 'review_gravatar', true);
 	$rating = get_post_meta($item->ID, 'review_rating', true);
-	$date = get_post_meta($item->ID, 'date_created', true);
+	$date = get_post_meta($item->ID, 'review_date', true);
+
+	if ($date) {
+		$date = strtotime($date);
+	} else {
+		$date = time() - rand(0, 100) * 3600 * 24;
+	}
 
 	if (empty($gravatar)) {
 		$gravatar = 'c8e57bdf509598c0a214f7b5c0b80bb3';
@@ -42,6 +48,10 @@
 						<span style="width: <?php echo $rating * 20; ?>%;"></span>
 					</div>
 				<?php } ?>
+
+				<div class="date">
+					<?php echo date('d M Y', $date); ?>
+				</div>
 
 			</div>
 

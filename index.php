@@ -13,6 +13,9 @@ License URI:	http://www.gnu.org/licenses/gpl-2.0.txt
 
 namespace RIO;
 
+define('RIO_DIR', __DIR__);
+define('RIO_URL', plugin_dir_url(__FILE__));
+
 include __DIR__ . '/classes/base.php';
 include __DIR__ . '/classes/woo.php';
 include __DIR__ . '/classes/admin.php';

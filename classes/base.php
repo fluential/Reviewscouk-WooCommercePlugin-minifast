@@ -399,7 +399,7 @@ class Base {
 			extract($data, EXTR_SKIP);
 		}
 
-		$filename = __DIR__ . '/templates/' . $template . '.php';
+		$filename = RIO_DIR . '/templates/' . $template . '.php';
 
 		if (file_exists($filename)) {
 
