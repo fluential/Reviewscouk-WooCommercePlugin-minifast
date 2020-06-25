@@ -31,6 +31,9 @@
 						</div>
 						<div class="votes"><?php echo $rating_count . ' ' . ($rating_count == 1 ? 'Review' : 'Reviews'); ?></div>
 					</div>
+					<?php if (!empty($link)) { ?>
+						<a href="<?php echo esc_url($link); ?>" class="logo" rel="nofollow" title="Reviews.io"></a>
+					<?php } ?>
 				</div>
 			<?php } ?>
 

@@ -79,4 +79,32 @@ jQuery(function($) {
 
 	});
 
+	$('.entry-summary .rio_stars').click(function() {
+
+		$('#tab-title-reviews > a').trigger('click');
+
+		smoothScrollTo($('#tab-title-reviews'));
+
+	});
+
+	function smoothScrollTo(element, speed) {
+
+		var $ = jQuery;
+
+		speed = parseInt(speed) || 1000;
+
+		element = $(element);
+
+		if (element.length > 0) {
+
+			var offset = element.offset().top - 40;
+
+			$('html, body').stop().animate({
+				'scrollTop': offset
+			}, speed);
+
+		}
+
+	}
+
 });

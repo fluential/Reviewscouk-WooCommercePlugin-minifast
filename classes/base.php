@@ -520,6 +520,8 @@ class Base {
 			'posts_per_page' => intval($args['number']),
 		);
 
+		$array['meta_query'] = array();
+
 		if ($args['product_id'] >= 0) {
 
 			$array['meta_query'] = array(
@@ -532,6 +534,16 @@ class Base {
 			);
 
 		}
+
+		$array['meta_query']['review_date'] = array(
+			'key' => 'review_date',
+			'compare' => 'EXISTS',
+			'type' => 'DATETIME'
+		);
+
+		$array['orderby'] = array(
+			'review_date' => 'DESC'
+		);
 
 		if ($args['offset']) {
 			$array['offset'] = intval($args['offset']);

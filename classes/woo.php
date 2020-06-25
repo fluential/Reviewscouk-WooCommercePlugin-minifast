@@ -131,6 +131,7 @@ class Woo {
 			'base' => $this->base,
 			'product_id' => $product_id,
 			'loader' => $this->loadButton($query),
+			'link' => $this->reviewsLink($product_id),
 			'rating_count' => get_post_meta($product_id, 'rating_count', true),
 			'rating_value' => get_post_meta($product_id, 'rating_value', true),
 		);
@@ -164,6 +165,7 @@ class Woo {
 			'base' => $this->base,
 			'product_id' => $product_id,
 			'loader' => $this->loadButton($query),
+			'link' => $this->reviewsLink($product_id),
 			'rating_count' => get_post_meta($product_id, 'rating_count', true),
 			'rating_value' => get_post_meta($product_id, 'rating_value', true),
 		);
@@ -177,6 +179,25 @@ class Woo {
 		ob_end_clean();
 
 		return $result;
+
+	}
+
+
+	public function reviewsLink($product_id) {
+
+		$link = 'https://www.reviews.co.uk/product-reviews/store/' . $this->base->getSetting('api_store_id');
+
+		if ($product_id > 0) {
+
+			$sku = get_post_meta($product_id, '_sku', true);
+
+			if ($sku) {
+				$link .= '/' . $sku;
+			}
+
+		}
+
+		return $link;
 
 	}
 
