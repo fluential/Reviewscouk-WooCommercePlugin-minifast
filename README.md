@@ -12,6 +12,7 @@ This plugin pulls all product and store reviews via cron mechanism into a databa
 * Merchant and product rich snippets on per url basis
 * System Logs
 * No Automated review collections -- use alternatives
+* Small size 26 KiB zip / 96 KiB uncompressed
 
 
 ### Installation
