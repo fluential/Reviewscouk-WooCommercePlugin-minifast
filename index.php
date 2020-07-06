@@ -1,14 +1,14 @@
 <?php
 
 /*
-Plugin Name:	WooCommerce Reviews.io Integration
-Plugin URI:		http://probion.com/
-Description:	Integrate the Reviews.io with the WooCommerce store
-Version:		1.0.0
-Author:			ProBion
-Author URI:		http://probion.com/
-License:		GPL-2.0+
-License URI:	http://www.gnu.org/licenses/gpl-2.0.txt
+Plugin Name:	WooCommerce Reviews.co.uk/Reviews.io Integration
+Plugin URI:     https://github.com/fluential/Reviewscouk-WooCommercePlugin-minifast
+Description:	Built for speed WooCommerce Plugin for Reviews.co.uk
+Version:        1.0.1
+Author:		fluential
+Author URI:	Built for speed WooCommerce Plugin for Reviews.co.uk
+License:	Aapache-2.0
+License URI:	http://www.apache.org/licenses/LICENSE-2.0
 */
 
 namespace RIO;
