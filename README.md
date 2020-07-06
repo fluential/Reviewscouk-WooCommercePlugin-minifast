@@ -38,3 +38,6 @@ Rich snippets as well as product reviews will be automatically generated on prod
 ### Support
 
 If you have any enquiries just open a new issue
+
+## Contributors
+[Toniievych Andrii](https://github.com/TwistedAndy)
