@@ -24,18 +24,20 @@ class Logs {
 
 		$this->logs[$type][] = $message;
 
+		$this->save();
+
 	}
 
 
 	public function info($message) {
 
-		$this->logs[self::INFO][] = $message;
+		$this->log($message, self::INFO);
 
 	}
 
 	public function error($message) {
 
-		$this->logs[self::ERROR][] = $message;
+		$this->log($message, self::ERROR);
 
 	}
 

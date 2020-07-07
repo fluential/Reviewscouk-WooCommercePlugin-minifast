@@ -39,7 +39,7 @@
 			<div class="name">
 				<?php echo $name; ?>
 				<?php if ($verified) { ?>
-					<div class="verified" title="Verified Buyer"></div>
+					<div class="verified" title="<?php echo __('Verified Buyer', 'rio'); ?>"></div>
 				<?php } ?>
 			</div>
 
@@ -50,7 +50,7 @@
 			<?php } ?>
 
 			<div class="date">
-				<?php echo date('d M Y', $date); ?>
+				<?php echo date(__('d M Y', 'rio'), $date); ?>
 			</div>
 
 		</div>

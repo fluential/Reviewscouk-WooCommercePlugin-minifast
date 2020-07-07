@@ -344,7 +344,7 @@ class Woo {
 
 			$result = '
 			<div class="load">
-				<div class="button' . ($hidden ? ' hidden' : '') . '" data-loader="' . htmlspecialchars(json_encode($args), ENT_QUOTES, 'UTF-8') . '">Show More</div>
+				<div class="button' . ($hidden ? ' hidden' : '') . '" data-loader="' . htmlspecialchars(json_encode($args), ENT_QUOTES, 'UTF-8') . '">' . __('Show More', 'rio') . '</div>
 			</div>';
 
 		}

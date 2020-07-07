@@ -38,7 +38,7 @@ class Admin {
 				$date = '';
 			}
 
-			$columns['product'] = 'Product';
+			$columns['product'] = __('Product', 'rio');
 
 			if ($date) {
 				$columns['date'] = $date;
@@ -61,7 +61,7 @@ class Admin {
 
 					$product = get_post($product_id);
 
-					if ($product instanceof WP_Post) {
+					if ($product instanceof \WP_Post) {
 						echo '<a href="/wp-admin/post.php?action=edit&post=' . $product_id . '">' . $product->post_title . '</a>';
 					}
 
@@ -108,7 +108,7 @@ class Admin {
 
 	public function admin_menu() {
 
-		add_submenu_page('tools.php', 'Reviews.io Synchronization', 'Reviews.io', 'administrator', $this->slug, array($this, 'settings_page'));
+		add_submenu_page('tools.php', __('Reviews.io Synchronization', 'rio'), __('Reviews.io', 'rio'), 'administrator', $this->slug, array($this, 'settings_page'));
 
 	}
 
@@ -125,7 +125,7 @@ class Admin {
 
 		<div class="wrap">
 
-			<h1>Reviews.io Synchronization</h1>
+			<h1><?php echo __('Reviews.io Synchronization', 'rio'); ?></h1>
 
 			<form method="post" action="options.php">
 
@@ -143,7 +143,7 @@ class Admin {
 
 			</form>
 
-			<h2>Latest Synchronization Report</h2>
+			<h2><?php echo __('Latest Synchronization Report', 'rio'); ?></h2>
 
 			<?php if ($logs) {
 				foreach ($logs as $type => $lines) {
@@ -159,12 +159,12 @@ class Admin {
 
 			<?php if ($timestamp = wp_next_scheduled($this->base->event)) { ?>
 
-				<h2>Upcoming Synchronization</h2>
+				<h2><?php echo __('Upcoming Synchronization', 'rio'); ?></h2>
 
-				<p>Next synchronization is scheduled on: <?php echo date('F j, Y, H:i:s', $timestamp + $offset); ?></p>
+				<p><?php echo __('Next synchronization is scheduled on:'); ?> <?php echo date('F j, Y, H:i:s', $timestamp + $offset); ?></p>
 
 				<p>
-					<a class="button button-primary" href="<?php echo admin_url('admin.php?page=' . $this->slug . '&sync-run'); ?>">Launch Now</a>
+					<a class="button button-primary" href="<?php echo admin_url('admin.php?page=' . $this->slug . '&sync-run'); ?>"><?php echo __('Launch Now', 'rio'); ?></a>
 				</p>
 
 			<?php } ?>

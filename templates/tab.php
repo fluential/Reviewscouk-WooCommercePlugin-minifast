@@ -29,7 +29,7 @@
 						<div class="stars">
 							<span style="width: <?php echo $rating_value * 20; ?>%;"></span>
 						</div>
-						<div class="votes"><?php echo $rating_count . ' ' . ($rating_count == 1 ? 'Review' : 'Reviews'); ?></div>
+						<div class="votes"><?php echo _n('%s Review', '%s Reviews', $rating_count, 'rio'); ?></div>
 					</div>
 					<?php if (!empty($link)) { ?>
 						<a href="<?php echo esc_url($link); ?>" class="logo" rel="nofollow" title="Reviews.io"></a>
@@ -46,12 +46,12 @@
 		<?php } else { ?>
 
 			<div class="message">
-				There are no reviews at the moment :(
+				<?php echo __('There are no reviews at the moment :(', 'rio'); ?>
 			</div>
 
 		<?php } ?>
 
-		<?php if (!empty($loader)) { ?>
+		<?php if (!empty($loader) and is_string($loader)) { ?>
 			<?php echo $loader; ?>
 		<?php } ?>
 		

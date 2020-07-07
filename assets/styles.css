@@ -7,6 +7,10 @@
 	line-height: 1.5;
 }
 
+.reviews_box:last-child {
+	margin-bottom: 0;
+}
+
 .reviews_box .stats {
 	display: flex;
 	position: relative;
