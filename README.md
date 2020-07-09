@@ -1,3 +1,5 @@
+[![HitCount](http://hits.dwyl.com/fluential/Reviewscouk-WooCommercePlugin-minifast.svg)](http://hits.dwyl.com/fluential/Reviewscouk-WooCommercePlugin-minifast)
+
 ## Reviews.co.uk & Reviews.io WooCommerce Integration Plugin
 
 This plugin integrates the merchant and product reviews on reviews.co.uk & reviews.io with a WooCommerce store eliminating slow js requests.
