@@ -35,6 +35,8 @@ Step 1: Go to Settings > Reviews.io
 
 Step 2: ~~Enter your Reviews.io/Reviews.co.uk API Credentials and Configure all settings.~~ -- Not required at this stage
 
+WPML: You may change translations options for the ```rio_review``` custom post type in ```WPML -> Settings -> Post Types Translation```
+
 ### Usage
 Rich snippets as well as product reviews will be automatically generated on product pages and selected urls (for merchan rich snippets)
 
