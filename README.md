@@ -1,3 +1,4 @@
+![Hits](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https%3A%2F%2Fgithub.com%2Ffluential%2FReviewscouk-WooCommercePlugin-minifast%2F)
 ## Reviews.co.uk & Reviews.io WooCommerce Integration Plugin
 
 This plugin integrates the merchant and product reviews on reviews.co.uk & reviews.io with a WooCommerce store eliminating slow js requests.
