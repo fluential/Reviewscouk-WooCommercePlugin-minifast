@@ -1,3 +1,5 @@
+[![HitCount](http://hits.dwyl.com/fluential/Reviewscouk-WooCommercePlugin-minifast.svg)](http://hits.dwyl.com/fluential/Reviewscouk-WooCommercePlugin-minifast)
+
 ## Reviews.co.uk & Reviews.io WooCommerce Integration Plugin
 
 This plugin integrates the merchant and product reviews on reviews.co.uk & reviews.io with a WooCommerce store eliminating slow js requests.
@@ -7,6 +9,7 @@ The original plugin "Reviewscouk WooCommerce" creates a massive cascade of javas
 
 ## Features
 This plugin pulls all product and store reviews via cron mechanism into a database, the data is rendered serverside eliminating slow js.
+* WPML Support
 * Backend reviews sync via cron
 * Merchant and product rich snippets on per url basis
 * System Logs
@@ -32,7 +35,9 @@ Step 4: Activate the Plugin
 
 Step 1: Go to Settings > Reviews.io
 
-Step 2: Enter your Reviews.io/Reviews.co.uk API Credentials and Configure all settings.
+Step 2: ~~Enter your Reviews.io/Reviews.co.uk API Credentials and Configure all settings.~~ -- Not required at this stage
+
+WPML: You may change translations options for the ```rio_review``` custom post type in ```WPML -> Settings -> Post Types Translation```
 
 ### Usage
 Rich snippets as well as product reviews will be automatically generated on product pages and selected urls (for merchan rich snippets)
