@@ -29,7 +29,7 @@
 						<div class="stars">
 							<span style="width: <?php echo $rating_value * 20; ?>%;"></span>
 						</div>
-						<div class="votes"><?php echo _n('%s Review', '%s Reviews', $rating_count, 'rio'); ?></div>
+						<div class="votes"><?php echo sprintf(_n('%s Review', '%s Reviews', $rating_count, 'rio'), $rating_count); ?></div>
 					</div>
 					<?php if (!empty($link)) { ?>
 						<a href="<?php echo esc_url($link); ?>" class="logo" rel="nofollow" title="Reviews.io"></a>
