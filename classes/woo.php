@@ -163,11 +163,8 @@ class Woo {
 		$variables = array(
 			'query' => $query,
 			'base' => $this->base,
-			'product_id' => $product_id,
 			'loader' => $this->loadButton($query),
-			'link' => $this->reviewsLink($product_id),
-			'rating_count' => get_post_meta($product_id, 'rating_count', true),
-			'rating_value' => get_post_meta($product_id, 'rating_value', true),
+			'link' => $this->reviewsLink($product_id)
 		);
 
 		$this->base->getTemplate('tab', $variables);

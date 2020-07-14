@@ -325,6 +325,29 @@ class Base {
 	}
 
 
+	public function getAllProductIds($product_id) {
+
+		$ids = array();
+
+		if (function_exists('wpml_get_content_translations_filter') and $translations = wpml_get_content_translations_filter('', $product_id, $content_type = 'post')) {
+
+			foreach ($translations as $translation) {
+				if (!empty($translation->element_id)) {
+					$ids[] = intval($translation->element_id);
+				}
+			}
+
+		} else {
+
+			$ids = array(intval($product_id));
+
+		}
+
+		return $ids;
+
+	}
+
+
 	public function getParentProducts() {
 
 		$db = $this->getDb();
@@ -385,34 +408,16 @@ class Base {
 
 		$array['meta_query'] = array();
 
-		if ($args['product_id'] > 0) {
+		if ($args['product_id'] > 0 and $ids = $this->getAllProductIds($args['product_id'])) {
 
-			$ids = array();
-
-			if (function_exists('wpml_get_content_translations_filter') and $translations = wpml_get_content_translations_filter('', $args['product_id'], $content_type = 'post')) {
-
-				foreach ($translations as $translation) {
-					if (!empty($translation->element_id)) {
-						$ids[] = intval($translation->element_id);
-					}
-				}
-
-			} else {
-
-				$ids = array(intval($args['product_id']));
-
-			}
-
-			if ($ids) {
-				$array['meta_query'] = array(
-					array(
-						'key' => 'review_product',
-						'value' => $ids,
-						'compare' => 'IN',
-						'type' => 'NUMERIC'
-					)
-				);
-			}
+			$array['meta_query'] = array(
+				array(
+					'key' => 'review_product',
+					'value' => $ids,
+					'compare' => 'IN',
+					'type' => 'NUMERIC'
+				)
+			);
 
 		}
 

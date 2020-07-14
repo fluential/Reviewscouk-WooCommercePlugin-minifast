@@ -1,14 +1,20 @@
 <?php if (!empty($query) and $query instanceof \WP_Query and $base instanceof \RIO\Base) {
 
-	if (empty($rating_count)) {
-		$rating_count = 0;
-	}
-
-	if (empty($rating_value)) {
-		$rating_value = 0;
-	}
-
 	$items = $query->posts;
+
+	$rating_count = 0;
+	$rating_value = 0;
+
+	if ($items) {
+
+		foreach ($items as $item) {
+			$rating_value += floatval(get_post_meta($item->ID, 'review_rating', true));
+			$rating_count++;
+		}
+
+		$rating_value = floatval($rating_value / $rating_count);
+
+	}
 
 	?>
 
