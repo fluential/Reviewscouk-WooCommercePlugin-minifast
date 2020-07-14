@@ -205,8 +205,12 @@ class Base {
 
 						$rating = round($rating / $count, 2);
 
-						update_post_meta($product_id, 'rating_count', $count);
-						update_post_meta($product_id, 'rating_value', $rating);
+						$product_ids = $this->getProductTranslationIds($product_id);
+
+						foreach ($product_ids as $id) {
+							update_post_meta($id, 'rating_count', $count);
+							update_post_meta($id, 'rating_value', $rating);
+						}
 
 					}
 
@@ -325,7 +329,7 @@ class Base {
 	}
 
 
-	public function getAllProductIds($product_id) {
+	public function getProductTranslationIds($product_id) {
 
 		$ids = array();
 
@@ -408,7 +412,7 @@ class Base {
 
 		$array['meta_query'] = array();
 
-		if ($args['product_id'] > 0 and $ids = $this->getAllProductIds($args['product_id'])) {
+		if ($args['product_id'] > 0 and $ids = $this->getProductTranslationIds($args['product_id'])) {
 
 			$array['meta_query'] = array(
 				array(
