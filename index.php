@@ -5,9 +5,9 @@ Plugin Name:    WooCommerce Reviews.io Integration
 Plugin URI:     https://github.com/fluential/Reviewscouk-WooCommercePlugin-minifast
 Description:    Built for speed WooCommerce Plugin for Reviews.io & Reviews.co.uk
 Text Domain:    rio
-Version:        1.0.3
-Author:		    fluential
-License:	    Apache-2.0
+Version:        1.0.4
+Author:		fluential
+License:	Apache-2.0
 License URI:	http://www.apache.org/licenses/LICENSE-2.0
 */
 
