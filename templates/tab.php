@@ -52,7 +52,7 @@
 		<?php } else { ?>
 
 			<div class="message">
-				<?php echo __('There are no reviews at the moment :(', 'rio'); ?>
+				<?php echo __('There are no reviews yet', 'rio'); ?>
 			</div>
 
 		<?php } ?>

@@ -180,7 +180,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: templates/tab.php:49
-msgid "There are no reviews at the moment :("
+msgid "There are no reviews yet"
 msgstr ""
 
 #. Plugin Name of the plugin/theme
