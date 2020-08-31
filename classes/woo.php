@@ -456,12 +456,12 @@ class Woo {
 
 				$markup = array(
 					'@context' => 'http://schema.org',
-					'@type' => 'Store',
+					'@type' => 'Organization',
 					'name' => get_bloginfo('name'),
 					'url' => home_url(),
 					'image' => get_site_icon_url(),
 					'description' => get_bloginfo('description'),
-					'price_range' => '$$',
+					//'price_range' => '$$',
 					'potentialAction' => array(
 						'@type' => 'SearchAction',
 						'target' => home_url('?s={search_term_string}&post_type=product'),
@@ -547,7 +547,7 @@ class Woo {
 
 				if (function_exists('get_woocommerce_currency_symbol')) {
 
-					$markup['currenciesAccepted'] = get_woocommerce_currency();
+					//$markup['currenciesAccepted'] = get_woocommerce_currency();
 
 					$fields = array(
 						'woocommerce_store_address' => 'streetAddress',
