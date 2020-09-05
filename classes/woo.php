@@ -142,12 +142,71 @@ class Woo {
 
 	}
 
+	public function loadButton($query) {
+
+		$result = '';
+
+		if ($query instanceof \WP_Query) {
+
+			$number = intval($query->query_vars['posts_per_page']);
+
+			$paged = intval($query->query_vars['paged']);
+
+			if ($paged == 0) {
+				$paged = 1;
+			}
+
+			$offset = $paged * $number;
+
+			$hidden = true;
+
+			if ($offset < $query->found_posts) {
+				$hidden = false;
+			}
+
+			$args = array(
+				'number' => $number,
+				'offset' => $offset,
+				'wrapper' => '.reviews_box',
+				'query_meta' => $query->get('meta_query'),
+				'query_order' => $query->get('orderby'),
+				'query_direction' => $query->get('order')
+			);
+
+			$result = '
+			<div class="load">
+				<div class="button' . ($hidden ? ' hidden' : '') . '" data-loader="' . htmlspecialchars(json_encode($args), ENT_QUOTES, 'UTF-8') . '">' . __('Show More', 'rio') . '</div>
+			</div>';
+
+		}
+
+		return $result;
+
+	}
+
+	public function reviewsLink($product_id) {
+
+		$link = 'https://www.reviews.co.uk/product-reviews/store/' . $this->base->getSetting('api_store_id');
+
+		if ($product_id > 0) {
+
+			$sku = get_post_meta($product_id, '_sku', true);
+
+			if ($sku) {
+				$link .= '/' . $sku;
+			}
+
+		}
+
+		return $link;
+
+	}
 
 	public function reviewsShortcode($data) {
 
 		ob_start();
 
-		$data = wp_parse_args($data,array(
+		$data = wp_parse_args($data, array(
 			'product_id' => 0,
 			'number' => 5,
 		));
@@ -178,26 +237,6 @@ class Woo {
 		return $result;
 
 	}
-
-
-	public function reviewsLink($product_id) {
-
-		$link = 'https://www.reviews.co.uk/product-reviews/store/' . $this->base->getSetting('api_store_id');
-
-		if ($product_id > 0) {
-
-			$sku = get_post_meta($product_id, '_sku', true);
-
-			if ($sku) {
-				$link .= '/' . $sku;
-			}
-
-		}
-
-		return $link;
-
-	}
-
 
 	public function loadHandler() {
 
@@ -243,7 +282,10 @@ class Woo {
 
 				}
 
-				if (!empty($_REQUEST['query_direction']) and in_array($_REQUEST['query_direction'], array('ASC', 'DESC'))) {
+				if (!empty($_REQUEST['query_direction']) and in_array($_REQUEST['query_direction'], array(
+						'ASC',
+						'DESC'
+					))) {
 					$args['order'] = $_REQUEST['query_direction'];
 				}
 
@@ -307,59 +349,53 @@ class Woo {
 
 	}
 
-
-	public function loadButton($query) {
-
-		$result = '';
-
-		if ($query instanceof \WP_Query) {
-
-			$number = intval($query->query_vars['posts_per_page']);
-
-			$paged = intval($query->query_vars['paged']);
-
-			if ($paged == 0) {
-				$paged = 1;
-			}
-
-			$offset = $paged * $number;
-
-			$hidden = true;
-
-			if ($offset < $query->found_posts) {
-				$hidden = false;
-			}
-
-			$args = array(
-				'number' => $number,
-				'offset' => $offset,
-				'wrapper' => '.reviews_box',
-				'query_meta' => $query->get('meta_query'),
-				'query_order' => $query->get('orderby'),
-				'query_direction' => $query->get('order')
-			);
-
-			$result = '
-			<div class="load">
-				<div class="button' . ($hidden ? ' hidden' : '') . '" data-loader="' . htmlspecialchars(json_encode($args), ENT_QUOTES, 'UTF-8') . '">' . __('Show More', 'rio') . '</div>
-			</div>';
-
-		}
-
-		return $result;
-
-	}
-
-
 	public function markupProduct($markup, $product) {
 
 		if ($product instanceof \WC_Product) {
+
+			/* Fix an issue with empty SKU number */
+
+			if ($product instanceof \WC_Product_Variable) {
+
+				$sku = $product->get_sku();
+
+				if (empty($sku)) {
+
+					$variations = $product->get_visible_children();
+
+					if ($variations) {
+
+						foreach ($variations as $variation) {
+
+							$item = wc_get_product($variation);
+
+							if ($item instanceof \WC_Product and $sku = $item->get_sku()) {
+								$markup['sku'] = $sku;
+								break;
+							}
+
+						}
+
+					}
+
+				}
+
+			}
+
+			if (isset($markup['sku'])) {
+				$markup['gtin13'] = $markup['sku'];
+			}
 
 			$product_id = $product->get_id();
 
 			$data = array(
 				'product_id' => $product_id,
 				'number' => -1
+			);
+
+			$markup['brand'] = array(
+				"@type" => 'Brand',
+				'name' => 'Probion'
 			);
 
 			$query = $this->base->getReviewsQuery($data);
@@ -456,12 +492,11 @@ class Woo {
 
 				$markup = array(
 					'@context' => 'http://schema.org',
-					'@type' => 'Store',
+					'@type' => 'Organization',
 					'name' => get_bloginfo('name'),
 					'url' => home_url(),
 					'image' => get_site_icon_url(),
 					'description' => get_bloginfo('description'),
-					'price_range' => '$$',
 					'potentialAction' => array(
 						'@type' => 'SearchAction',
 						'target' => home_url('?s={search_term_string}&post_type=product'),
@@ -540,14 +575,13 @@ class Woo {
 					$markup['aggregateRating'] = array(
 						'@type' => 'AggregateRating',
 						'ratingValue' => round($total / $count, 2),
-						'reviewCount' => $count,
+						'ratingCount' => $count,
+						'bestRating' => 5,
 					);
 
 				}
 
 				if (function_exists('get_woocommerce_currency_symbol')) {
-
-					$markup['currenciesAccepted'] = get_woocommerce_currency();
 
 					$fields = array(
 						'woocommerce_store_address' => 'streetAddress',
