@@ -166,7 +166,7 @@ class API {
 
 			return false;
 
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 
 			$this->log->error($e->getMessage());
 
@@ -196,7 +196,7 @@ class API {
 
 			return false;
 
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 
 			$this->log->error($e->getMessage());
 

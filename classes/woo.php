@@ -121,19 +121,17 @@ class Woo {
 
 		$data = array(
 			'product_id' => $product_id,
-			'number' => 5
+			'number' => -1
 		);
 
 		$query = $this->base->getReviewsQuery($data);
 
 		$variables = array(
+			'woo' => $this,
 			'query' => $query,
 			'base' => $this->base,
 			'product_id' => $product_id,
-			'loader' => $this->loadButton($query),
 			'link' => $this->reviewsLink($product_id),
-			'rating_count' => get_post_meta($product_id, 'rating_count', true),
-			'rating_value' => get_post_meta($product_id, 'rating_value', true),
 		);
 
 		$this->base->getTemplate('tab', $variables);
@@ -141,6 +139,7 @@ class Woo {
 		wp_reset_postdata();
 
 	}
+
 
 	public function loadButton($query) {
 
@@ -348,6 +347,7 @@ class Woo {
 		wp_send_json($result);
 
 	}
+
 
 	public function markupProduct($markup, $product) {
 

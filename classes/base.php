@@ -127,7 +127,9 @@ class Base {
 
 		$sync_started = intval(get_option($key, 0));
 
-		if ($time - $sync_started > 5 * 60) {
+		if ($time - $sync_started > 5 * 60 or true) {
+
+			print_r(get_queried_object());
 
 			update_option($key, $time);
 

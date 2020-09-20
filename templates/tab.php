@@ -1,4 +1,4 @@
-<?php if (!empty($query) and $query instanceof \WP_Query and $base instanceof \RIO\Base) {
+<?php if (!empty($query) and $query instanceof \WP_Query and !empty($base) and $base instanceof \RIO\Base) {
 
 	$items = $query->posts;
 
@@ -16,6 +16,15 @@
 
 	}
 
+	if (!empty($product_id)) {
+		update_post_meta($product_id, 'rating_count', $rating_count);
+		update_post_meta($product_id, 'rating_value', $rating_value);
+	}
+
+	$items = array_slice($items, 0, 5);
+
+	$query->set('posts_per_page', 5);
+
 	?>
 
 	<div class="reviews_box">
@@ -24,7 +33,7 @@
 			<h2><?php echo $title; ?></h2>
 		<?php } ?>
 		
-		<?php if ($query->have_posts()) { ?>
+		<?php if ($items) { ?>
 
 			<?php if ($rating_count > 0) { ?>
 				<div class="stats">
@@ -57,8 +66,8 @@
 
 		<?php } ?>
 
-		<?php if (!empty($loader) and is_string($loader)) { ?>
-			<?php echo $loader; ?>
+		<?php if (!empty($woo) and $woo instanceof \RIO\Woo) { ?>
+			<?php echo $woo->loadButton($query); ?>
 		<?php } ?>
 		
 	</div>
